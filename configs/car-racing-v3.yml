@@ -1,6 +1,6 @@
 environmentName: CarRacing-v3
-runName: YourRunName
-seed: 1
+runName: test
+seed: 1234
 
 gradientSteps: 60000
 replayRatio: 100

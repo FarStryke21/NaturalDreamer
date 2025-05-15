@@ -51,10 +51,11 @@ class Dreamer:
 
     def worldModelTraining(self, data):
         encodedObservations = self.encoder(data.observations.view(-1, *self.observationShape)).view(self.config.batchSize, self.config.batchLength, -1)
-        previousRecurrentState  = torch.zeros(self.config.batchSize, self.recurrentSize,    device=self.device)
-        previousLatentState     = torch.zeros(self.config.batchSize, self.latentSize,       device=self.device)
+        previousRecurrentState  = torch.zeros(self.config.batchSize, self.recurrentSize,    device=self.device) # Initialization of the recurrent state
+        previousLatentState     = torch.zeros(self.config.batchSize, self.latentSize,       device=self.device) # Initialization of the latent state
 
         recurrentStates, priorsLogits, posteriors, posteriorsLogits = [], [], [], []
+        
         for t in range(1, self.config.batchLength):
             recurrentState              = self.recurrentModel(previousRecurrentState, previousLatentState, data.actions[:, t-1])
             _, priorLogits              = self.priorNet(recurrentState)

@@ -6,6 +6,7 @@ from dreamer    import Dreamer
 from utils      import loadConfig, seedEverything, plotMetrics
 from envs       import getEnvProperties, GymPixelsProcessingWrapper, CleanGymWrapper
 from utils      import saveLossesToCSV, ensureParentFolders
+from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -34,7 +35,7 @@ def main(configFile):
     dreamer.environmentInteraction(env, config.episodesBeforeStart, seed=config.seed)
 
     iterationsNum = config.gradientSteps // config.replayRatio
-    for _ in range(iterationsNum):
+    for _ in tqdm(range(iterationsNum)):
         for _ in range(config.replayRatio):
             sampledData                         = dreamer.buffer.sample(dreamer.config.batchSize, dreamer.config.batchLength)
             initialStates, worldModelMetrics    = dreamer.worldModelTraining(sampledData)

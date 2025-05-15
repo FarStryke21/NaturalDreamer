@@ -1,0 +1,122 @@
+# Configuration for Robosuite Lift environment with Panda arm
+
+# Environment and Run Settings
+environmentName: Lift              # Robosuite environment name
+robotName: Panda                   # Robot to use in Robosuite (e.g., Panda, Sawyer, IIWA)
+controllerName: BASIC              # Controller for the robot (e.g., OSC_POSE, JOINT_VELOCITY, JOINT_POSITION)
+useCameraObs: True                 # Whether to use camera observations
+cameraName: agentview              # Name of the camera to use for observations (e.g., agentview, frontview)
+cameraWidth: 64                    # Width of the camera observation
+cameraHeight: 64                   # Height of the camera observation
+rewardShaping: True                # Whether the environment should use shaped rewards
+controlFreq: 20                    # Control frequency of the environment
+horizon: 500                       # Horizon of the environment (max episode steps)
+evaluationRender: True             # Render evaluation episodes for video saving
+
+runName: lift_panda_test           # A descriptive name for this run
+seed: 1234                         # Random seed for reproducibility
+
+# Training Loop Settings
+gradientSteps: 100000              # Total number_of_gradient_steps for training (may need tuning)
+replayRatio: 10                    # Number of gradient steps per environment interaction step (lower for more on-policy like)
+saveMetrics: True                  # Save metrics during training
+saveCheckpoints: True              # Save model checkpoints
+checkpointInterval: 5000           # Interval (in gradient steps) for saving checkpoints
+resume: False                      # Whether to resume training from a checkpoint
+checkpointToLoad: "50k"            # Suffix of the checkpoint file to load (e.g., "50k" for checkpoint_50k.pth)
+
+# Interaction and Evaluation Settings
+episodesBeforeStart: 10            # Number of random episodes to fill the buffer before training starts
+numInteractionEpisodes: 1          # Number of episodes to run for collecting new data per training iteration
+numEvaluationEpisodes: 3           # Number of episodes to run for evaluation
+
+# Dreamer Agent Configuration
+dreamer:
+    batchSize: 32                  # Batch size for training
+    batchLength: 64                # Sequence length for training
+    imaginationHorizon: 15         # How many steps to imagine into the future
+
+    # Model Sizes
+    recurrentSize: 512             # Size of the recurrent state (h)
+    latentLength: 32               # Number of categorical distributions for the latent state (z)
+    latentClasses: 32              # Number of classes in each categorical distribution for z
+                                   # (latentSize = latentLength * latentClasses)
+    encodedObsSize: 1024           # Size of the encoded observation from the CNN
+
+    # Learning Parameters and Coefficients
+    useContinuationPrediction: False # Predict a continuation flag (gamma)
+    actorLR: 0.00008               # Learning rate for the actor model (may need tuning)
+    criticLR: 0.00015              # Learning rate for the critic model (may need tuning)
+    worldModelLR: 0.0003           # Learning rate for the world model (may need tuning)
+    gradientNormType: 2            # Type of norm for gradient clipping
+    gradientClip: 100.0            # Value for gradient clipping
+
+    discount: 0.999                # Discount factor for future rewards (gamma for Bellman, higher for longer horizons)
+    lambda_: 0.95                  # Lambda for GAE (Generalized Advantage Estimation)
+    freeNats: 1.0                  # Minimum KL divergence value (helps prevent posterior collapse)
+    betaPrior: 1.0                 # Weight for the KL divergence term (prior vs posterior)
+    betaPosterior: 0.1             # Weight for the KL divergence term (posterior vs prior SG)
+    entropyScale: 0.0001           # Coefficient for the entropy bonus in the actor loss (may need tuning)
+
+    # Replay Buffer Configuration
+    buffer:
+        capacity: 100000           # Maximum number of transitions to store in the replay buffer (increased for potentially more diverse data)
+
+    # Network Architectures (Hyperparameters for each sub-model)
+    # Note: Activation functions can be Tanh, ReLU, ELU, LeakyReLU, etc.
+    # Hidden sizes and numLayers may need tuning for Robosuite tasks.
+
+    encoder:                       # CNN to encode observations
+        depth: 32                  # Base channel depth for convolutional layers (e.g., 16, 32)
+        stride: 2                  # Stride for convolutional layers
+        kernelSize: 4              # Kernel size for convolutional layers
+        activation: ELU            # Activation function
+
+    decoder:                       # CNN to decode latent states back to observations
+        depth: 32                  # Base channel depth for deconvolutional layers
+        stride: 2                  # Stride for deconvolutional layers
+        kernelSize: 5              # Kernel size for deconvolutional layers (adjust for proper output shape)
+        activation: ELU            # Activation function
+
+    recurrentModel:                # GRU/RNN for temporal dynamics
+        hiddenSize: 512            # Hidden size of the GRU input layer
+        activation: Tanh           # Activation function
+
+    priorNet:                      # Predicts prior latent state (z_hat) from recurrent state (h)
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+        uniformMix: 0.01           # Mixture coefficient for uniform noise in categorical sampling
+
+    posteriorNet:                  # Predicts posterior latent state (z) from h and encoded_obs
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+        uniformMix: 0.01           # Mixture coefficient for uniform noise in categorical sampling
+        
+    reward:                        # Predicts reward from (h, z)
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+
+    continuation:                  # Predicts continuation flag (discount factor) from (h, z)
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+    
+    actor:                         # Policy network, outputs action distribution parameters from (h, z)
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+
+    critic:                        # Value network, estimates value V_lambda from (h, z)
+        hiddenSize: 400            # Hidden size of MLP layers
+        numLayers: 3               # Number of hidden layers in MLP
+        activation: ELU            # Activation function
+
+# Folder Names for Saving Data
+folderNames:
+    metricsFolder: metrics         # Folder to save training metrics (CSV files)
+    plotsFolder: plots             # Folder to save metric plots (HTML files)
+    checkpointsFolder: checkpoints # Folder to save model checkpoints (.pth files)
+    videosFolder: videos           # Folder to save evaluation videos (.mp4 files)
