@@ -22,11 +22,11 @@ replayRatio: 10                    # Number of gradient steps per environment in
 saveMetrics: True                  # Save metrics during training
 saveCheckpoints: True              # Save model checkpoints
 checkpointInterval: 5000           # Interval (in gradient steps) for saving checkpoints
-resume: False                      # Whether to resume training from a checkpoint
-checkpointToLoad: "50k"            # Suffix of the checkpoint file to load (e.g., "50k" for checkpoint_50k.pth)
+resume: True                      # Whether to resume training from a checkpoint
+checkpointToLoad: 10k            # Suffix of the checkpoint file to load (e.g., "50k" for checkpoint_50k.pth)
 
 # Interaction and Evaluation Settings
-episodesBeforeStart: 10            # Number of random episodes to fill the buffer before training starts
+episodesBeforeStart: 20            # Number of random episodes to fill the buffer before training starts
 numInteractionEpisodes: 1          # Number of episodes to run for collecting new data per training iteration
 numEvaluationEpisodes: 3           # Number of episodes to run for evaluation
 
