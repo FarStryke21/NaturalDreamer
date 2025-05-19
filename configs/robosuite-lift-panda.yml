@@ -21,7 +21,7 @@ gradientSteps: 100000              # Total number_of_gradient_steps for training
 replayRatio: 10                    # Number of gradient steps per environment interaction step (lower for more on-policy like)
 saveMetrics: True                  # Save metrics during training
 saveCheckpoints: True              # Save model checkpoints
-checkpointInterval: 5000           # Interval (in gradient steps) for saving checkpoints
+checkpointInterval: 2000           # Interval (in gradient steps) for saving checkpoints
 resume: True                      # Whether to resume training from a checkpoint
 checkpointToLoad: 10k            # Suffix of the checkpoint file to load (e.g., "50k" for checkpoint_50k.pth)
 
